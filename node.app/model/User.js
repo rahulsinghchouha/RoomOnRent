@@ -22,7 +22,7 @@ email:{
    type:mongoose.Schema.Types.ObjectId,
    ref:"Products",
  }]
-
+ 
 })
 
 module.exports = mongoose.model("User",User);

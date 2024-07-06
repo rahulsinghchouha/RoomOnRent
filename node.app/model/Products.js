@@ -23,6 +23,17 @@ const Products = mongoose.Schema({
 },
  addedBy:{
    type:mongoose.Schema.Types.ObjectId,
+ },
+ pLoc:{
+   type:{
+      type:String,
+      enum:['Point'],
+      default:'point',
+   },
+   coordinates:{
+      type:[Number] //this will be the number of array
+   }
  }
 })
+Products.index({pLoc:'2dsphere'});
 module.exports = mongoose.model("Products",Products);

@@ -55,10 +55,9 @@ app.post('/add-products',upload.fields([{name:'productImage'},{name:'productImag
     console.log(req.files); //more than one so we use files
     console.log(req.body);
 
-   
-
     //fetching the data 
-
+    const plat = req.body.plat;
+    const plong = req.body.plong;
     const {productName,productDesc,price,category} = req.body;
     const productImage = req.files.productImage[0].path;  //yaha hm product ki image nikal rahe hai jo ki product ki form men hai
     const productImage2 = req.files.productImage2[0].path;
@@ -66,7 +65,12 @@ app.post('/add-products',upload.fields([{name:'productImage'},{name:'productImag
 
     //entry in database key value same to ek hee bar likh sakte hai
 
-    const products = new Products ({productName,productDesc,price,category,productImage,productImage2,addedBy});
+    const products = new Products ({
+        productName,productDesc,
+        price,category,productImage,
+        productImage2,addedBy,
+       pLoc:{type:'Point', coordinates:[plat,plong]}
+});
 
     await products.save()
     .then(()=>{res.send({message : 'saved success'})})
@@ -129,6 +133,22 @@ app.post('/liked-products',async (req,res)=>{
 
 })
 
+//My - Products
+app.post('/my-products',async (req,res)=>{
+    //liked products ko hm user ke andar se find krenge
+    //console.log("liked products")
+
+    const userId = req.body.userId;
+
+    //user id added by ke equal hai vo vale product
+    await Products.find({addedBy:userId})
+    .then((result)=>{
+    console.log("user data ->",result)
+    res.send({message:'data fetch succesfully',products:result})})
+    .catch((err)=>{res.send({message:'server err'})})
+
+})
+
 //get Product Details when we pass the id so we need /:id
 app.get('/product-Details/:productId',async(req,res)=>{
     //we can check the data using the console
@@ -143,8 +163,38 @@ app.get('/product-Details/:productId',async(req,res)=>{
 
 })
 
+//for my profile
+
+app.get('/my-profile/:userId',async(req,res)=>{
+   
+    const uid = req.params.userId;
+
+    User.findOne({_id:uid})
+    .then((result)=>{
+        res.send({
+            message:" data fetched succesfully ",
+            user:{
+                email:result.email,
+                mobile:result.mobile,
+                username:result.username
+            }
+        })
+    })
+    .catch((err)=>{  
+        res.send({
+            message:"server err",
+            error:err
+        })
+    })
+})
+
 //ab hm search ke liye data backend se lenge
 app.get('/search', async (req,res)=>{
+
+    console.log(req.query);
+    
+    const latitude = req.query.loc.split(',')[0];//split krne se ye array ho jayega jiska 0 index hm le lenge then
+    const longitude = req.query.loc.split(',')[1];//then yaha se hm longitude nikal lenge 
 
     //is query ke basis pr hm result ko find out krenge
     let search = req.query.search;
@@ -155,7 +205,17 @@ app.get('/search', async (req,res)=>{
            { productDesc:{$regex:search} },
            { category:{$regex:search} },
            { price:{$regex:search} },
-        ]
+        ],
+        //hmara second criteria jo hoga vo location vala hoga
+        // pLoc:{//hm near vale bhi return krke denge
+        //     $near:{
+        //         $geometry: {
+        //             type:"Point",
+        //             coordinates:[parseFloat(latitude),parseFloat(longitude)]
+        //         }
+        //     },
+        //     $maxDistance :500 * 1000,
+        // }
     })
     .then((result)=>{
         console.log("user data ->",result)
