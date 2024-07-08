@@ -22,11 +22,35 @@ module.exports.likeProducts = async(req,res)=>{
         })
 
 }
+module.exports.dislikeProducts = async(req,res)=>{
+    let productId = req.body.productId;
+    let userId = req.body.userId;
+    //console.log(req.body);
+    
+
+    //ab hme user vale model ko update krna hai liked array ko jese hm sql men where ka use 
+    // vese hee yaha bhi use krenge id user id ke equal honi chahiye
+    //yaha pr hmara like name ka array hai to usme data add krne ke liye hm $ addToSet ka use krenge
+    //likedProduct is schema name and productId we getch from body
+    await User.updateOne(
+                    {_id:userId},
+                    {
+                        $pull :{likedProducts:productId}
+                    }
+                    )
+        .then(()=>{
+            res.send({message:"dis like success"})
+        })
+        .catch((err)=>{
+            res.send({message:"like server err"})
+        })
+
+}
 
 module.exports.signUp = async (req,res)=>{
     //getting data from frontend
 
-    console.log(req.body);
+   
     const username = req.body.username;
     const password = req.body.password;
     const mobile = req.body.mobile;
@@ -47,14 +71,14 @@ module.exports.signUp = async (req,res)=>{
 }
 
 module.exports.login = async (req,res)=>{
-    console.log(req.body);
+   
     const username = req.body.username;
     const password = req.body.password;
 
     //isme hm find krenge
      await User.findOne({username:username})
     .then((result)=>{
-        console.log("user data",result); // comsole pr 
+         // comsole pr 
         if(!result)
             {
                 res.send({message:"user not found"}); //response sign vale handle api ke alert men print hoga
@@ -127,12 +151,13 @@ module.exports.getUserById = async(req,res)=>{
 }
 module.exports.likedProducts = async (req,res)=>{
     //liked products ko hm user ke andar se find krenge
-    console.log("liked products")
+    
 
     await User.findOne({_id:req.body.userId}).populate('likedProducts')
     .then((result)=>{
-    console.log("user data ->",result)
+   
     res.send({message:'data fetch succesfully',products:result.likedProducts})})
     .catch((err)=>{res.send({message:'server err'})})
 
 }
+

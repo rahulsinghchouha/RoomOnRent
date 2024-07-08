@@ -51,6 +51,8 @@ app.post('/add-products',upload.fields([{name:'productImage'},{name:'productImag
 app.get('/get-products',productController.getProduct);
 //like products
 app.post('/like-product',userController.likeProducts);
+//for dis like
+app.post('/dislike-product',userController.dislikeProducts);
 //for get the liked Product products jb kuchh data ko bhejna hai to hm post ka use krenge t
 // then data ko find kr lenge
 app.post('/liked-products',userController.likedProducts);

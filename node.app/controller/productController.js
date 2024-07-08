@@ -3,7 +3,7 @@ const Products = require("../model/Products");
 
 module.exports.search = async (req,res)=>{
 
-    console.log(req.query);
+    
     
     const latitude = req.query.loc.split(',')[0];//split krne se ye array ho jayega jiska 0 index hm le lenge then
     const longitude = req.query.loc.split(',')[1];//then yaha se hm longitude nikal lenge 
@@ -30,7 +30,7 @@ module.exports.search = async (req,res)=>{
         // }
     })
     .then((result)=>{
-        console.log("user data ->",result)
+        //console.log("user data ->",result)
         res.send({message:'data fetch succesfully',products:result})})
     .catch((err)=>{res.send({message:'server err'})})
 
@@ -39,9 +39,7 @@ module.exports.search = async (req,res)=>{
 module.exports.addProduct = async(req,res)=>{
     //for check what i get from body
    
-    console.log(req.files); //more than one so we use files
-    console.log(req.body);
-
+    
     //fetching the data 
     const plat = req.body.plat;
     const plong = req.body.plong;
@@ -76,22 +74,24 @@ module.exports.getProduct = async(req,res)=>{
             _f={category:catName}
         }
 
-    await Products.find(_f)
+        await Products.find(_f)
     .then((result)=>{
-        console.log("user data ->",result)
+               
         res.send({message:'data fetch succesfully',products:result})})
-    .catch((err)=>{res.send({message:'server err'})})
+    .catch((err)=>{res.send({message:'server err'},
+        err
+    )})
 
 }
 
 module.exports.getProductById = async(req,res)=>{
     //we can check the data using the console
-    console.log(req.params);
+   
     //ye id find out krenge jo ki product ki id hai
     //ek hee product hoga isliye findOne ka use krenge
     await Products.findOne({_id:req.params.productId})
     .then((result)=>{
-        console.log("user data ->",result)
+       
         res.send({message:'data fetch succesfully',product:result})})
     .catch((err)=>{res.send({message:'server err'})})
 }
@@ -103,7 +103,7 @@ module.exports.myProducts = async (req,res)=>{
     //user id added by ke equal hai vo vale product
     await Products.find({addedBy:userId})
     .then((result)=>{
-    console.log("user data ->",result)
+   
     res.send({message:'data fetch succesfully',products:result})})
     .catch((err)=>{res.send({message:'server err',err})})
 }
