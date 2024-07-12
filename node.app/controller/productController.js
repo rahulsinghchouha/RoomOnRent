@@ -35,8 +35,34 @@ module.exports.search = async (req,res)=>{
     .catch((err)=>{res.send({message:'server err'})})
 
 }
-
+//for add the product
 module.exports.addProduct = async(req,res)=>{
+    //for check what i get from body
+   
+    
+    //fetching the data 
+    const plat = req.body.plat;
+    const plong = req.body.plong;
+    const {productName,productDesc,price,category} = req.body;
+    const productImage = req.files.productImage[0].path;  //yaha hm product ki image nikal rahe hai jo ki product ki form men hai
+    const productImage2 = req.files.productImage2[0].path;
+    const addedBy = req.body.userId;
+
+    //entry in database key value same to ek hee bar likh sakte hai
+
+    const products = new Products ({
+        productName,productDesc,
+        price,category,productImage,
+        productImage2,addedBy,
+       pLoc:{type:'Point', coordinates:[plat,plong]}
+});
+
+    await products.save()
+    .then(()=>{res.send({message : 'saved success'})})
+    .catch((err)=>{res.send({message: 'server err'})})
+}
+//for edit product
+module.exports.editProduct = async(req,res)=>{
     //for check what i get from body
    
     
@@ -63,10 +89,8 @@ module.exports.addProduct = async(req,res)=>{
 }
 
 module.exports.getProduct = async(req,res)=>{
-
     const catName = req.query.catName;
-
-    //console.log("category--->",catName);
+    console.log("category--->",catName);
 
     let _f = {}
     if(catName)
@@ -78,22 +102,49 @@ module.exports.getProduct = async(req,res)=>{
     .then((result)=>{
                
         res.send({message:'data fetch succesfully',products:result})})
-    .catch((err)=>{res.send({message:'server err'},
-        err
+        .catch((err)=>{
+            res.status(404).json({message:'server err'},
+            { err}
     )})
 
 }
+module.exports.deleteProduct = async(req,res)=>{
 
+    // console.log(req.body); for check the data
+    Products.findOne({_id:req.body.productId})
+    .then((result)=>{
+        if(result.addedBy == req.body.userId)
+        {
+            Products.deleteOne({_id:req.body.productId})
+            .then((deleteResult)=>{
+                //console.log(deleteResult);
+                if(deleteResult.acknowledged){
+                     res.send({message : "delete Succesfully"})
+                }
+            })
+            .catch((err)=>{
+                res.send("Product delete error");
+            })
+        }
+    })
+    .catch((err)=>{
+        res.send("Product delete error");
+    })
+
+}
 module.exports.getProductById = async(req,res)=>{
     //we can check the data using the console
    
     //ye id find out krenge jo ki product ki id hai
     //ek hee product hoga isliye findOne ka use krenge
+
+    console.log(req.params.productId);
+
     await Products.findOne({_id:req.params.productId})
     .then((result)=>{
        
         res.send({message:'data fetch succesfully',product:result})})
-    .catch((err)=>{res.send({message:'server err'})})
+    .catch((err)=>{res.send({message:'server err backend'})})
 }
 
 module.exports.myProducts = async (req,res)=>{

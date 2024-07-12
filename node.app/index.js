@@ -1,8 +1,6 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
-const User = require("./model/User");
-const Products = require("./model/Products");
 const productController = require("./controller/productController");
 const userController = require("./controller/userController");
 
@@ -11,6 +9,17 @@ const cors = require('cors');
 
 app.use(cors());
 
+//live chat
+const http = require('http');
+const httpServer = http.createServer(app);
+const {Server} = require("socket.io");
+const io = new Server (httpServer,
+  {
+    cors:{
+      origin: '*'
+    }
+  }
+);
 // for fetch the data from body we use the body parser
 const bodyParser = require('body-parser');
 app.use(bodyParser.json()) // for json
@@ -49,6 +58,7 @@ app.get('/',(req,res)=>{
 app.post('/add-products',upload.fields([{name:'productImage'},{name:'productImage2'}]),productController.addProduct)
 //get api product
 app.get('/get-products',productController.getProduct);
+app.post('/delete-product',productController.deleteProduct);
 //like products
 app.post('/like-product',userController.likeProducts);
 //for dis like
@@ -70,10 +80,13 @@ app.post('/signup', userController.signUp);
 //login api
 app.post('/login', userController.login);
 
-
+//live chatting
+io.on('connection',(socket)=>{
+  console.log('Socket Connecte',socket.id);
+})
 
 //for print something on browser
-app.listen(process.env.PORT,()=>{
+httpServer.listen(process.env.PORT,()=>{
     console.log(`Example app listening on port ${process.env.PORT}`)
 })
 
