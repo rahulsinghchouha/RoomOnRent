@@ -99,7 +99,7 @@ module.exports.login = async (req,res)=>{
                         }
                      )
                      //token men response men userId ko bhi send kr diya hai 
-                        res.send({message:"find succesfully",token:token,userId:result._id}); //message
+                        res.send({message:"find succesfully",token:token,userId:result._id,username : result.username}); //message
                     }
             }
        

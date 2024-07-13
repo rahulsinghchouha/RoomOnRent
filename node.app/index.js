@@ -6,7 +6,7 @@ const userController = require("./controller/userController");
 
 //cors for different different server
 const cors = require('cors');
-
+let messages = [];
 app.use(cors());
 
 //live chat
@@ -31,7 +31,7 @@ const multer = require('multer');
     //path is inbuild we dont need to install this
     const path = require('path');
     app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-const storage = multer.diskStorage({
+    const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, 'uploads') //folder name
     },
@@ -83,6 +83,13 @@ app.post('/login', userController.login);
 //live chatting
 io.on('connection',(socket)=>{
   console.log('Socket Connecte',socket.id);
+//socket men hmko data milega jb send krte hai to hm data ko bhejte hai
+  socket.on('sendMsg',(data)=>{
+    messages.push(data);
+    io.emit('getMsg',messages)
+  })
+
+  io.emit('getMsg',messages)
 })
 
 //for print something on browser
